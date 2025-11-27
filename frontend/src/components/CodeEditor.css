@@ -1,0 +1,25 @@
+.editor-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.suggestion-panel {
+  border: 1px dashed #cbd5f5;
+  background: #eef2ff;
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+}
+
+.suggestion-panel pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
