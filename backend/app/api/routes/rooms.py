@@ -1,6 +1,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import models
@@ -16,6 +17,16 @@ async def create_room(session: AsyncSession = Depends(get_session)) -> RoomRespo
     session.add(room)
     await session.commit()
     await session.refresh(room)
+    return RoomResponse(roomId=room.id)
+
+
+@router.get("/latest", response_model=RoomResponse)
+async def get_latest_room(session: AsyncSession = Depends(get_session)) -> RoomResponse:
+    stmt = select(models.Room).order_by(models.Room.updated_at.desc()).limit(1)
+    result = await session.execute(stmt)
+    room = result.scalar_one_or_none()
+    if not room:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No rooms available")
     return RoomResponse(roomId=room.id)
 
 

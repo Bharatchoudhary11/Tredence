@@ -25,6 +25,10 @@ This project contains a FastAPI backend and a React/TypeScript frontend that tog
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
+5. Optionally fetch the most recently used room (after at least one exists):
+   ```bash
+   curl http://127.0.0.1:8000/rooms/latest
+   ```
 
 ## Frontend (React + Vite)
 
@@ -44,7 +48,14 @@ This project contains a FastAPI backend and a React/TypeScript frontend that tog
    ```
 3. By default the UI calls `http://localhost:8000`. Override via `VITE_API_BASE_URL`/`VITE_WS_BASE_URL`.
 
-## Development Notes
+## Architecture & Design Notes
 - Backend folders are organized by concern (`app/api`, `app/services`, `app/db`, etc.) to keep routers and business logic separate.
-- WebSocket broadcasts follow a last-write-wins strategy while persisting the latest code back to Postgres.
-- Autocomplete suggestions are intentionally simple but the endpoint contract mirrors what a real model could use later.
+- SQLAlchemy (async) models persist each room’s code; the WebSocket loop updates Postgres and broadcasts to peers via an in-memory `RoomManager`.
+- The frontend uses Redux Toolkit to keep editor state and WebSocket events in sync across components, while a small hook handles debounced autocomplete calls.
+- Autocomplete is mocked with deterministic heuristics so the API contract mirrors what a real model could use later without external dependencies.
+
+## Improvements & Limitations
+- **Mock AI**: Suggestions are rule-based and deterministic; integrating a true LLM (or expanding heuristics) would provide smarter completions.
+- **Presence & conflicts**: Only last-write-wins syncing exists. Adding operational transforms/CRDTs and user presence indicators would improve collaboration.
+- **Persistence**: Postgres stores only the latest code. Tracking history or diffs would enable undo/versioning.
+- **Auth & security**: Rooms are public and unauthenticated. Introducing optional auth or expiring room tokens could protect sessions.
